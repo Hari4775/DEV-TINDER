@@ -2,36 +2,53 @@ const express= require("express")
 const connectDB = require("../config/mongodb")
 const app=express()
 const User=require('../model/user')
-app.use(express.json())
+const {validateSignupData,validationLogin} = require("../util/validation")
+
+const bcrypt =require("bcrypt")
+
+app.use(express.json());
+
 
 app.post("/signup",async(req,res)=>{
-    const user= new User(req.body)
-    await user.save();
+
+
     try{
-        res.send("user registerd successfully")
+        validateSignupData(req)
+     
+        const{name,email,password}= req.body
+       
+        const hashedPassword = await bcrypt.hash(password,10)
+        console.log(hashedPassword,"hash password")
+        const user = new User({name,email,password:hashedPassword})
+        await user.save()
+        res.send("user signn up successfully")
+
     }catch(err){ 
-        res.status(400).send("Error for saving the data"+err.message)
+        res.status(400).send("ERROR SINGUP DATA  "  + err.message)
     }
 })
 
-app.get("/getuser",async(req,res)=>{
-  try{
-    const getUsers=await User.find()
-    res.send(getUsers)
-  }catch(err){
-    res.status(400).send("error getting users data")
-  }
-
-})
-app.get("/getuserbymail",async(req,res)=>{
-    const userMail= req.body.email
-    try{
-       const uniqueUser= await User.findOne({email:userMail})
-       res.send(uniqueUser)
-    }catch(err){
-        res.status(400).send("error getting the specified user dataSDFSD")
+app.post("/login",async(req,res)=>{
+try{
+    // validationLogin(req)
+    const{email,password} = req.body;
+    const user = await User.findOne({email:email})
+    if(!user){
+        throw new Error("invalid login credentials");
     }
+   
+    const isValidPassword=await bcrypt.compare(password,user.password)
+    if(isValidPassword){
+        res.send("Login successfull")
+    }
+    else{
+        throw new Error('invalid password')
+    }
+}catch(err){
+ res.status(400).send("error: " +err.message)
+}
 })
+
 connectDB()
 .then(()=>{
     console.log("data base connection is established")
