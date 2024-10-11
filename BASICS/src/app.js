@@ -29,7 +29,7 @@ app.get("/getuserbymail",async(req,res)=>{
        const uniqueUser= await User.findOne({email:userMail})
        res.send(uniqueUser)
     }catch(err){
-        res.status(400).send("error getting the specified user data")
+        res.status(400).send("error getting the specified user dataSDFSD")
     }
 })
 connectDB()
