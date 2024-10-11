@@ -13,6 +13,25 @@ app.post("/signup",async(req,res)=>{
         res.status(400).send("Error for saving the data"+err.message)
     }
 })
+
+app.get("/getuser",async(req,res)=>{
+  try{
+    const getUsers=await User.find()
+    res.send(getUsers)
+  }catch(err){
+    res.status(400).send("error getting users data")
+  }
+
+})
+app.get("/getuserbymail",async(req,res)=>{
+    const userMail= req.body.email
+    try{
+       const uniqueUser= await User.findOne({email:userMail})
+       res.send(uniqueUser)
+    }catch(err){
+        res.status(400).send("error getting the specified user data")
+    }
+})
 connectDB()
 .then(()=>{
     console.log("data base connection is established")
