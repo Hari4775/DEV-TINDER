@@ -36,7 +36,7 @@ connectDB()
 .then(()=>{
     console.log("data base connection is established")
     app.listen(3000,()=>{
-        console.log("server is connected to  3000 portSSS")
+        console.log("server is connected to  3000 portS0000")
     })
 })
 .catch((err)=>{
