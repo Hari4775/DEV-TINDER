@@ -2,18 +2,14 @@ const express= require("express")
 const connectDB = require("../config/mongodb")
 const app=express()
 const User=require('../model/user')
+app.use(express.json())
 
 app.post("/signup",async(req,res)=>{
-    const user= new User({
-        name:"hari",
-        email:"hari@gmail,com",
-        password:"asdfhkj34"
-    })
+    const user= new User(req.body)
     await user.save();
     try{
         res.send("user registerd successfully")
     }catch(err){ 
-        // error handling
         res.status(400).send("Error for saving the data"+err.message)
     }
 })
