@@ -1,11 +1,14 @@
 const express= require("express")
 const connectDB = require("../config/mongodb")
-const app=express()
+
 const User=require('../model/user')
 const {validateSignupData,validationLogin} = require("../util/validation")
 
 const bcrypt =require("bcrypt")
+const cookieparser= require("cookie-parser")
 
+const app=express();
+app.use(cookieparser());
 app.use(express.json());
 
 
@@ -34,6 +37,9 @@ try{
    
     const isValidPassword=await bcrypt.compare(password,user.password)
     if(isValidPassword){
+    //    providing dummy token 
+
+      res.cookie("token","asjkdfhasdjhfasjkdfalsdjk")
         res.send("Login successfull")
     }
     else{
@@ -42,6 +48,19 @@ try{
 }catch(err){
  res.status(400).send("error: " +err.message)
 }
+})
+
+app.get("/profile",async(req,res)=>{
+    try{
+        console.log("cookies",req.cookies)
+        const user =await User.find()
+
+        res.send(user)
+
+    }catch(err){
+        res.status(400).send('error: '+err.message)
+    }
+
 })
 
 connectDB()
