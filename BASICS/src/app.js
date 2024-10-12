@@ -10,19 +10,14 @@ app.use(express.json());
 
 
 app.post("/signup",async(req,res)=>{
-
-
     try{
         validateSignupData(req)
-     
         const{name,email,password}= req.body
-       
         const hashedPassword = await bcrypt.hash(password,10)
         console.log(hashedPassword,"hash password")
         const user = new User({name,email,password:hashedPassword})
         await user.save()
         res.send("user signn up successfully")
-
     }catch(err){ 
         res.status(400).send("ERROR SINGUP DATA  "  + err.message)
     }
@@ -30,7 +25,7 @@ app.post("/signup",async(req,res)=>{
 
 app.post("/login",async(req,res)=>{
 try{
-    // validationLogin(req)
+    validationLogin(req)
     const{email,password} = req.body;
     const user = await User.findOne({email:email})
     if(!user){
