@@ -16,7 +16,8 @@ const validateSignupData = (req)=>{
     }
 }
 
-const validationLogin=(req)=>{
+const validationLogin =(req)=>{
+    const {email}= req.body
     if(!validator.isEmail(email)){
         throw new Error("Email is not valid")
     }
