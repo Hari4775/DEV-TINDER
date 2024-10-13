@@ -1,83 +1,19 @@
-const express= require("express")
-const connectDB = require("../config/mongodb")
+const express= require("express");
+const connectDB = require("../config/mongodb");
+const cookieparser= require("cookie-parser");
 
-const User=require('../model/user')
-const {validateSignupData,validationLogin} = require("../util/validation")
+const authRouter = require("../routes/auth");
+const profileRouter =require("../routes/profile");
+const requestRouter = require("../routes/requests");
 
-const bcrypt =require("bcrypt")
-const cookieparser= require("cookie-parser")
-const jwt = require("jsonwebtoken")
 
 const app=express();
 app.use(cookieparser());
 app.use(express.json());
 
-
-app.post("/signup",async(req,res)=>{
-    try{
-        validateSignupData(req)
-        const{name,email,password}= req.body
-        const hashedPassword = await bcrypt.hash(password,10)
-        console.log(hashedPassword,"hash password")
-        const user = new User({name,email,password:hashedPassword})
-        await user.save()
-        res.send("user signn up successfully")
-    }catch(err){ 
-        res.status(400).send("ERROR SINGUP DATA  "  + err.message)
-    }
-})
-
-app.post("/login",async(req,res)=>{
-try{
-    validationLogin(req)
-    const{email,password} = req.body;
-    const user = await User.findOne({email:email})
-    if(!user){
-        throw new Error("invalid login credentials");
-    }
-    const isValidPassword=await bcrypt.compare(password,user.password)
-    if(isValidPassword){
-    //    providing JWT  token 
-    // _id refers the database unique id, and provide a password
-      const token = await jwt.sign({ _id: user._id},"HARIkumar@202$4");
-      console.log(token,"login token")
-      res.cookie(token,"login token")
-        res.send("Login successfull")
-    }
-    else{
-        throw new Error('invalid password')
-    }
-}catch(err){
- res.status(400).send("error: " +err.message)
-}
-})
-
-app.get("/profile",async(req,res)=>{
-    try{
-        const cookies= req.cookies
-        console.log(cookies,"cookies dsafgh")
-        console.log(cookies.token,"cookies token")
-        const {token}=cookies
-        console.log(token,"tokenss")
-        // if(!token){
-        //     throw new Error('invalid token')
-        // }
-        const decodedMessage= await jwt.verify(cookies, "HARIkumar@202$4")
-
-        console.log(decodedMessage,"decoded message")
-        const {_id}= decodedMessage
-        console.log("logged in user is :" + _id);
-        const user = await User.findById(_id);
-        if(!user){
-            throw new Error("User is not found")
-        }
-        res.send(user)
-
-    }catch(err){
-        res.status(400).send('error: '+err.message)
-    }
-
-})
+app.use("/",authRouter);
+app.use("/",profileRouter);
+app.use("/",requestRouter)
 
 connectDB()
 .then(()=>{
