@@ -9,10 +9,10 @@ const jwt = require("jsonwebtoken");
 authRouter.post("/signup",async(req,res)=>{
     try{
         validateSignupData(req)
-        const{name,email,password}= req.body
+        const{fristName,lastName,email,password}= req.body
         const hashedPassword = await bcrypt.hash(password,10)
         console.log(hashedPassword,"hash password")
-        const user = new User({name,email,password:hashedPassword})
+        const user = new User({fristName, lastName,email,password:hashedPassword})
         await user.save()
         res.send("user signn up successfully")
     }catch(err){ 
@@ -27,13 +27,15 @@ authRouter.post("/login",async(req,res)=>{
         if(!user){
             throw new Error("invalid login credentials");
         }
-       const ispasswordValid =await bcrypt.compare(password,user.password);
+       const ispasswordValid =await user.validatePassword(password)
 
        if(ispasswordValid){
         // token have  hidden user_id, password:"DEV@TINDER$790"
-        const token = await jwt.sign({_id: user._id},"DEV@Tinder$790");
-        console.log(token)
-        res.cookie("token",token);
+        const token = await user.getJWT();
+      
+        res.cookie("token",token,{
+            expires:new Date(Date.now() +8*3600000),
+        });
         res.send("login successfully")
        }
        
@@ -47,7 +49,11 @@ authRouter.post("/login",async(req,res)=>{
 
 authRouter.post("/logout",(req,res)=>{
     try{
-
+        // REMOVE THE TOKEN AND PROVIDED EXPIRE TIME RIGHT NOW 
+       res.cookie("token",null,{
+        expires:new Date(Date.now())
+       })
+       res.send("LOG OUT SUCCESSFULL !!")
     }catch(err){
        res.status(400).send("ERROR LOG OUT " + err.message)
     }
