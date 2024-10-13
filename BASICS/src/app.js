@@ -1,12 +1,12 @@
-const express= require("express")
-const connectDB = require("../config/mongodb")
+const express= require("express");
+const connectDB = require("../config/mongodb");
+const {userAuth} =require("../middleware/auth");
+const User=require('../model/user');
+const {validateSignupData} = require("../util/validation");
 
-const User=require('../model/user')
-const {validateSignupData,validationLogin} = require("../util/validation")
-
-const bcrypt =require("bcrypt")
-const cookieparser= require("cookie-parser")
-const jwt = require("jsonwebtoken")
+const bcrypt =require("bcrypt");
+const cookieparser= require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const app=express();
 app.use(cookieparser());
@@ -27,9 +27,8 @@ app.post("/signup",async(req,res)=>{
     }
 })
 
-app.post("/login",async(req,res)=>{
+app.post("/login", async(req,res)=>{
 try{
-    validationLogin(req)
     const{email,password} = req.body;
     const user = await User.findOne({email:email})
     if(!user){
@@ -39,10 +38,10 @@ try{
     if(isValidPassword){
     //    providing JWT  token 
     // _id refers the database unique id, and provide a password
-      const token = await jwt.sign({ _id: user._id},"HARIkumar@202$4");
-      console.log(token,"login token")
-      res.cookie(token,"login token")
-        res.send("Login successfull")
+    const token = await jwt.sign({_id:user._id},"Hari@1234")
+    console.log(token)
+    res.cookie("token",token)
+    res.send("login successfully")
     }
     else{
         throw new Error('invalid password')
@@ -52,27 +51,10 @@ try{
 }
 })
 
-app.get("/profile",async(req,res)=>{
+app.get("/profile", userAuth,async(req,res)=>{
     try{
-        const cookies= req.cookies
-        console.log(cookies,"cookies dsafgh")
-        console.log(cookies.token,"cookies token")
-        const {token}=cookies
-        console.log(token,"tokenss")
-        // if(!token){
-        //     throw new Error('invalid token')
-        // }
-        const decodedMessage= await jwt.verify(cookies, "HARIkumar@202$4")
-
-        console.log(decodedMessage,"decoded message")
-        const {_id}= decodedMessage
-        console.log("logged in user is :" + _id);
-        const user = await User.findById(_id);
-        if(!user){
-            throw new Error("User is not found")
-        }
+       const user= req.user;
         res.send(user)
-
     }catch(err){
         res.status(400).send('error: '+err.message)
     }
