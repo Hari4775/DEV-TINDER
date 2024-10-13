@@ -3,10 +3,13 @@ const validator = require("validator")
 // npm i validator--- for validating external module
 
 const validateSignupData = (req)=>{
-    const {name,email,password} =req.body;
+    const {fristName,lastName,email,password,age} =req.body;
 
-    if(!name){
+    if(!fristName){
         throw new Error("name is not valid")
+    }
+    else if(!age){
+        throw new Error("age is required")
     }
     else if(!validator.isEmail(email)){
         throw new Error("Email is not valid")
@@ -16,11 +19,12 @@ const validateSignupData = (req)=>{
     }
 }
 
-const validationLogin =(req)=>{
-    const {email}= req.body
-    if(!validator.isEmail(email)){
-        throw new Error("Email is not valid")
-    }
+const validateProfileData =(req)=>{
+    const allowedEditFields=["fristName","lastName","email","photoURL","about"]
+    const isEditAllowed = Object.keys(req.body).every(field=>allowedEditFields.includes(field));
+ 
+    return isEditAllowed;
 }
 
-module.exports={validateSignupData,validationLogin}
+
+module.exports={validateSignupData,validateProfileData}
