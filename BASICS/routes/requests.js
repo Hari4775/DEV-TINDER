@@ -11,7 +11,7 @@ const requestRouter = express.Router();
 
 requestRouter.post("/requests/send/:status/:toUserId", userAuth,async(req,res)=>{
     try{
-        const fromUserId = req.user.id; //requesed user id
+        const fromUserId = req.user.id; //requesed user ID
         const toUserId = req.params.toUserId; //we using dynamic :toUserId so get toUserId from routes by using params method
         const status = req.params.status;  //staus also provided dynamically. access staus buy using params method
        
@@ -55,6 +55,8 @@ requestRouter.post("/requests/send/:status/:toUserId", userAuth,async(req,res)=>
     }catch(err){
         res.status(400).send("ERROR: "+err.message)
     }
-})                
+})  
+
+REQUE
 
 module.exports= requestRouter;
