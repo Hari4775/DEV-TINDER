@@ -9,10 +9,10 @@ const jwt = require("jsonwebtoken");
 authRouter.post("/signup",async(req,res)=>{
     try{
         validateSignupData(req)
-        const{fristName,lastName,email,password}= req.body
+        const{fristName,lastName,email,password,age,photoURL,gender,about,skills}= req.body
         const hashedPassword = await bcrypt.hash(password,10)
         console.log(hashedPassword,"hash password")
-        const user = new User({fristName, lastName,email,password:hashedPassword})
+        const user = new User({fristName, lastName, email,password:hashedPassword,age,photoURL,gender,about,skills})
         await user.save()
         res.send("user signn up successfully")
     }catch(err){ 
