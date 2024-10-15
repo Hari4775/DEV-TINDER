@@ -8,7 +8,7 @@ const requestRouter = express.Router();
 // : means dynamic routes can change the values
 // userAuth will help to check the token
 // status dynamica ayi use cheythan  interested,ignored url same route il access cheyyam
-
+// SENDING REQUESTING
 requestRouter.post("/requests/send/:status/:toUserId", userAuth,async(req,res)=>{
     try{
         const fromUserId = req.user.id; //requesed user ID
@@ -57,6 +57,41 @@ requestRouter.post("/requests/send/:status/:toUserId", userAuth,async(req,res)=>
     }
 })  
 
-REQUE
+
+// READ REQUESTS 
+requestRouter.post(
+    "/request/review/:status/:requestId",
+    userAuth,async(req,res)=>{
+        try{
+            const loggedInUser = req.user;
+            const {status,requestId} = req.params;
+
+            const allowedStatus= ["accepted","rejected"]
+            if(!allowedStatus){
+                return res.status(400).json({message:"status not allowed"})
+            }
+
+            // interested requests only recieves
+            const connectionRequest = await ConnectionRequest.findOne({
+                _id:requestId,
+                toUserId:loggedInUser._id,
+                status:"interested",
+            })
+            if(!connectionRequest){
+                return  res.status(404).json({message:"connection request not found"})
+            }
+            connectionRequest.status =status;
+
+            const data =await connectionRequest.save()
+            res.json({
+                message:"connection request "+ status, data
+            })
+
+        }catch(err){
+            res.status(400).send('ERROR: '+err.message)
+        }
+  
+
+})
 
 module.exports= requestRouter;
